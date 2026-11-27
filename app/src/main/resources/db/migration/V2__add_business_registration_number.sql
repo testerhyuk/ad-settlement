@@ -1,0 +1,1 @@
+alter table advertiser add business_registration_number varchar(10) not null unique
