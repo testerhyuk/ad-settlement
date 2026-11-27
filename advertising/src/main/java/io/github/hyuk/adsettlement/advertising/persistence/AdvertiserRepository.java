@@ -7,8 +7,5 @@ import java.util.Optional;
 
 @Repository
 public interface AdvertiserRepository extends JpaRepository<Advertiser, Long> {
-    Optional<Advertiser> findByAdvertiserNameAndBusinessRegistrationNumber(
-            String advertiserName,
-            String businessRegistrationNumber
-    );
+    boolean existsByBusinessRegistrationNumber(String businessRegistrationNumber);
 }
