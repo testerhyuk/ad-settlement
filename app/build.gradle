@@ -11,12 +11,22 @@ java {
 }
 
 dependencies {
+    // 모듈
+    implementation project(':advertising')
+
     // REST API 및 내장 웹 서버
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 
     // 테스트
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // PostgreSQL JDBC Driver
+    runtimeOnly 'org.postgresql:postgresql'
+
+    // Flyway
+    runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
+    runtimeOnly 'org.flywaydb:flyway-database-postgresql'
 }
 
 tasks.named('test') {
