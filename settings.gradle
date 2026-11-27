@@ -1,3 +1,4 @@
 rootProject.name = 'ad-settlement'
 
 include 'app'
+include 'advertising'
