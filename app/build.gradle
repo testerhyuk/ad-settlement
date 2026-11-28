@@ -13,6 +13,7 @@ java {
 dependencies {
     // 모듈
     implementation project(':advertising')
+    implementation project(':publisher')
 
     // REST API 및 내장 웹 서버
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
