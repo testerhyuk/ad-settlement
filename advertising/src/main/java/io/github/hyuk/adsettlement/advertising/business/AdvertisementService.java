@@ -5,6 +5,7 @@ import io.github.hyuk.adsettlement.advertising.implement.AdvertisementReader;
 import io.github.hyuk.adsettlement.advertising.implement.AdvertiserReader;
 import io.github.hyuk.adsettlement.advertising.persistence.Advertisement;
 import io.github.hyuk.adsettlement.advertising.persistence.Advertiser;
+import io.github.hyuk.adsettlement.advertising.presentation.dto.AdvertisementDetailResponse;
 import io.github.hyuk.adsettlement.advertising.presentation.dto.AdvertisementRequest;
 import io.github.hyuk.adsettlement.advertising.presentation.dto.AdvertisementResponse;
 import lombok.RequiredArgsConstructor;
@@ -41,5 +42,12 @@ public class AdvertisementService {
         Advertisement savedAdvertisement = advertisementAppender.append(advertisement);
 
         return AdvertisementResponse.from(savedAdvertisement);
+    }
+
+    @Transactional(readOnly = true)
+    public AdvertisementDetailResponse getAdvertisement(Long advertisementId) {
+        Advertisement advertisement = advertisementReader.getAdvertisement(advertisementId);
+
+        return AdvertisementDetailResponse.from(advertisement);
     }
 }

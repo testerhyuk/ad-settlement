@@ -1,5 +1,6 @@
 package io.github.hyuk.adsettlement.advertising.presentation.advice;
 
+import io.github.hyuk.adsettlement.advertising.exception.AdvertiserNotFoundException;
 import io.github.hyuk.adsettlement.advertising.exception.DuplicateBusinessRegistrationNumberException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,15 @@ public class AdvertiserExceptionHandler {
     ) {
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
+                .body(Map.of("message", exception.getMessage()));
+    }
+
+    @ExceptionHandler(AdvertiserNotFoundException.class)
+    public ResponseEntity<Map<String, String>> handleAdvertiserNotFound(
+            AdvertiserNotFoundException exception
+    ) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
                 .body(Map.of("message", exception.getMessage()));
     }
 }
