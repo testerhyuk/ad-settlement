@@ -1,15 +1,14 @@
 package io.github.hyuk.adsettlement.advertising.presentation;
 
 import io.github.hyuk.adsettlement.advertising.business.AdvertisementService;
+import io.github.hyuk.adsettlement.advertising.presentation.dto.AdvertisementDetailResponse;
 import io.github.hyuk.adsettlement.advertising.presentation.dto.AdvertisementRequest;
 import io.github.hyuk.adsettlement.advertising.presentation.dto.AdvertisementResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,5 +20,12 @@ public class AdvertisementController {
         AdvertisementResponse response = advertisementService.register(request);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping("/api/v1/advertisements/{advertisementId}")
+    public ResponseEntity<AdvertisementDetailResponse> getAdvertisement(@PathVariable("advertisementId") Long advertisementId) {
+        AdvertisementDetailResponse response = advertisementService.getAdvertisement(advertisementId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }

@@ -1,5 +1,6 @@
 package io.github.hyuk.adsettlement.advertising.business;
 
+import io.github.hyuk.adsettlement.advertising.exception.AdvertisementNotFoundException;
 import io.github.hyuk.adsettlement.advertising.exception.DuplicateAdvertisementNameException;
 import io.github.hyuk.adsettlement.advertising.implement.AdvertisementAppender;
 import io.github.hyuk.adsettlement.advertising.implement.AdvertisementReader;
@@ -7,6 +8,7 @@ import io.github.hyuk.adsettlement.advertising.implement.AdvertiserReader;
 import io.github.hyuk.adsettlement.advertising.persistence.Advertisement;
 import io.github.hyuk.adsettlement.advertising.persistence.Advertiser;
 import io.github.hyuk.adsettlement.advertising.persistence.enums.AdvertisementStatus;
+import io.github.hyuk.adsettlement.advertising.presentation.dto.AdvertisementDetailResponse;
 import io.github.hyuk.adsettlement.advertising.presentation.dto.AdvertisementRequest;
 import io.github.hyuk.adsettlement.advertising.presentation.dto.AdvertisementResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -140,5 +142,69 @@ class AdvertisementServiceTest {
 
         verify(advertisementAppender, never())
                 .append(any(Advertisement.class));
+    }
+
+    @Test
+    @DisplayName("광고 단건 조회 성공")
+    void getAdvertisement() {
+        // given
+        Advertiser advertiser = mock(Advertiser.class);
+        Advertisement advertisement = mock(Advertisement.class);
+
+        Instant createdAt = Instant.parse("2026-11-28T09:00:00Z");
+        Instant startedAt = Instant.parse("2026-12-01T00:00:00Z");
+        Instant expiredAt = Instant.parse("2026-12-31T23:59:59Z");
+
+        when(advertiser.getAdvertiserId()).thenReturn(1L);
+        when(advertiser.getAdvertiserName()).thenReturn("A");
+
+        when(advertisement.getAdvertisementId()).thenReturn(10L);
+        when(advertisement.getAdvertiser()).thenReturn(advertiser);
+        when(advertisement.getAdvertisementName()).thenReturn("A 광고");
+        when(advertisement.getBudgetAmount()).thenReturn(BigDecimal.valueOf(1_000_000));
+        when(advertisement.getImpressionPrice()).thenReturn(BigDecimal.valueOf(1_000));
+        when(advertisement.getConversionPrice()).thenReturn(BigDecimal.valueOf(5_000));
+        when(advertisement.getStatus()).thenReturn(AdvertisementStatus.ACTIVE);
+        when(advertisement.getCreatedAt()).thenReturn(createdAt);
+        when(advertisement.getStartedAt()).thenReturn(startedAt);
+        when(advertisement.getExpiredAt()).thenReturn(expiredAt);
+
+        when(advertisementReader.getAdvertisement(10L))
+                .thenReturn(advertisement);
+
+        // when
+        AdvertisementDetailResponse response =
+                advertisementService.getAdvertisement(10L);
+
+        // then
+        assertEquals(10L, response.advertisementId());
+        assertEquals(1L, response.advertiserId());
+        assertEquals("A", response.advertiserName());
+        assertEquals("A 광고", response.advertisementName());
+        assertEquals(BigDecimal.valueOf(1_000_000), response.budgetAmount());
+        assertEquals(BigDecimal.valueOf(1_000), response.impressionPrice());
+        assertEquals(BigDecimal.valueOf(5_000), response.conversionPrice());
+        assertEquals("ACTIVE", response.status());
+        assertEquals(createdAt, response.createdAt());
+        assertEquals(startedAt, response.startedAt());
+        assertEquals(expiredAt, response.expiredAt());
+
+        verify(advertisementReader).getAdvertisement(10L);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 광고 조회 시 예외 발생")
+    void getAdvertisementNotFound() {
+        // given
+        when(advertisementReader.getAdvertisement(999L))
+                .thenThrow(new AdvertisementNotFoundException("존재하지 않는 광고입니다."));
+
+        // when & then
+        assertThrows(
+                AdvertisementNotFoundException.class,
+                () -> advertisementService.getAdvertisement(999L)
+        );
+
+        verify(advertisementReader).getAdvertisement(999L);
     }
 }

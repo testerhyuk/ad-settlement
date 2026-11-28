@@ -1,5 +1,6 @@
 package io.github.hyuk.adsettlement.advertising.implement;
 
+import io.github.hyuk.adsettlement.advertising.exception.AdvertiserNotFoundException;
 import io.github.hyuk.adsettlement.advertising.exception.DuplicateBusinessRegistrationNumberException;
 import io.github.hyuk.adsettlement.advertising.persistence.Advertiser;
 import io.github.hyuk.adsettlement.advertising.persistence.AdvertiserRepository;
@@ -19,6 +20,7 @@ public class AdvertiserReader {
 
     public Advertiser getById(Long advertiserId) {
         return advertiserRepository.findById(advertiserId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 광고주입니다."));
+                .orElseThrow(() -> new AdvertiserNotFoundException("존재하지 않는 광고주입니다."));
     }
+
 }

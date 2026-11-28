@@ -1,10 +1,12 @@
 package io.github.hyuk.adsettlement.advertising.presentation;
 
 import io.github.hyuk.adsettlement.advertising.business.AdvertisementService;
+import io.github.hyuk.adsettlement.advertising.exception.AdvertisementNotFoundException;
 import io.github.hyuk.adsettlement.advertising.exception.DuplicateAdvertisementNameException;
 import io.github.hyuk.adsettlement.advertising.persistence.enums.AdvertisementStatus;
 import io.github.hyuk.adsettlement.advertising.presentation.advice.AdvertisementExceptionHandler;
 import io.github.hyuk.adsettlement.advertising.presentation.advice.AdvertiserExceptionHandler;
+import io.github.hyuk.adsettlement.advertising.presentation.dto.AdvertisementDetailResponse;
 import io.github.hyuk.adsettlement.advertising.presentation.dto.AdvertisementRequest;
 import io.github.hyuk.adsettlement.advertising.presentation.dto.AdvertisementResponse;
 import org.junit.jupiter.api.DisplayName;
@@ -21,6 +23,7 @@ import java.time.Instant;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -139,5 +142,63 @@ class AdvertisementControllerTest {
                 .andExpect(jsonPath("$.message").value("이미 등록된 광고입니다."));
 
         verify(advertisementService).register(any(AdvertisementRequest.class));
+    }
+
+    @Test
+    @DisplayName("광고 단건 조회 성공")
+    void getAdvertisement() throws Exception {
+        // given
+        Instant createdAt = Instant.parse("2026-11-28T09:00:00Z");
+        Instant startedAt = Instant.parse("2026-12-01T00:00:00Z");
+        Instant expiredAt = Instant.parse("2026-12-31T23:59:59Z");
+
+        AdvertisementDetailResponse response = new AdvertisementDetailResponse(
+                10L,
+                1L,
+                "A",
+                "A 광고",
+                BigDecimal.valueOf(1_000_000),
+                BigDecimal.valueOf(1_000),
+                BigDecimal.valueOf(5_000),
+                "ACTIVE",
+                createdAt,
+                startedAt,
+                expiredAt
+        );
+
+        when(advertisementService.getAdvertisement(10L))
+                .thenReturn(response);
+
+        // when & then
+        mockMvc.perform(get("/api/v1/advertisements/{advertisementId}", 10L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.advertisementId").value(10))
+                .andExpect(jsonPath("$.advertiserId").value(1))
+                .andExpect(jsonPath("$.advertiserName").value("A"))
+                .andExpect(jsonPath("$.advertisementName").value("A 광고"))
+                .andExpect(jsonPath("$.budgetAmount").value(1_000_000))
+                .andExpect(jsonPath("$.impressionPrice").value(1_000))
+                .andExpect(jsonPath("$.conversionPrice").value(5_000))
+                .andExpect(jsonPath("$.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.createdAt").exists())
+                .andExpect(jsonPath("$.startedAt").exists())
+                .andExpect(jsonPath("$.expiredAt").exists());
+
+        verify(advertisementService).getAdvertisement(10L);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 광고 조회 시 404 반환")
+    void getAdvertisementNotFound() throws Exception {
+        // given
+        when(advertisementService.getAdvertisement(999L))
+                .thenThrow(new AdvertisementNotFoundException("존재하지 않는 광고입니다."));
+
+        // when & then
+        mockMvc.perform(get("/api/v1/advertisements/{advertisementId}", 999L))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("존재하지 않는 광고입니다."));
+
+        verify(advertisementService).getAdvertisement(999L);
     }
 }
